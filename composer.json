@@ -1,0 +1,25 @@
+{
+  "name": "guissilveira/maildocker-laravel-driver",
+  "type": "library",
+  "description" : "Maildocker mail driver for Laravel",
+  "keywords": ["laravel", "mail", "driver", "maildocker"],
+  "license": "MIT",
+  "homepage" : "https://github.com/guissilveira",
+  "authors": [
+    {
+      "name" : "Guilherme Silveira da Silva",
+      "role" : "Web Developer",
+      "email" : "guissilveira@gmail.com"
+    }
+  ],
+  "require": {
+    "illuminate/container": ">=5.0",
+    "swiftmailer/swiftmailer": "~5.1",
+    "guzzlehttp/guzzle": "~5.3|~6.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Guissilveira\\MailDrivers\\Maildocker\\": "src"
+    }
+  }
+}
