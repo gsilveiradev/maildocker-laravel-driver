@@ -2,7 +2,7 @@
 
 Require this package with composer using the following command:
 ```bash
-composer require guissilveira/maildocker-laravel-driver:dev-master
+composer require guissilveira/maildocker-laravel-driver
 ```
 
 After updating composer, add the service provider to the `providers` array in `config/app.php`
