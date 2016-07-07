@@ -11,7 +11,7 @@ use Illuminate\Mail\Transport\Transport;
 
 class MaildockerTransport extends Transport
 {
-    const MAXIMUM_FILE_SIZE = 7340032;
+    const MAXIMUM_FILE_SIZE = 6291456;
 
     protected $client;
     protected $options;
@@ -20,7 +20,7 @@ class MaildockerTransport extends Transport
     {
         $this->client = $client;
         $this->options = [
-            'headers' => ['Authorization' => 'Basic ' . base64_encode($api_key . ':' . $api_secret)]
+            'auth' => array($api_key,$api_secret,'basic')
         ];
     }
 
@@ -38,25 +38,23 @@ class MaildockerTransport extends Transport
     public function send(Swift_Mime_Message $message, &$failedRecipients = null)
     {
         list($from, $fromName) = $this->getFromAddresses($message);
+        
         $payload = $this->options;
         $data = [
-            'from'     => $from,
-            'fromname' => isset($fromName) ? $fromName : null,
+        
+            'from'     => array('name' => isset($fromName) ? $fromName : null, 'email' => $from),
             'subject'  => $message->getSubject(),
             'html'     => $message->getBody()
         ];
+        
         $this->setTo($data, $message);
         $this->setCc($data, $message);
         $this->setBcc($data, $message);
         $this->setText($data, $message);
         $this->setAttachment($data, $message);
-        $this->setSmtpApi($data, $message);
-        if (version_compare(ClientInterface::VERSION, '6') === 1) {
-            $payload += ['form_params' => $data];
-        } else {
-            $payload += ['body' => $data];
-        }
-        return $this->client->post('https://ecentry.io:443/api/maildocker/v1/mail/', $payload);
+
+        $payload += ['json' => $data];
+        return $this->client->request('POST', 'https://ecentry.io:443/api/maildocker/v1/mail/', $payload);
     }
     /**
      * @param  $data
@@ -65,8 +63,9 @@ class MaildockerTransport extends Transport
     protected function setTo(&$data, Swift_Mime_Message $message)
     {
         if ($to = $message->getTo()) {
-            $data['to'] = array_keys($to);
-            $data['toname'] = array_values($to);
+            foreach ($to as $email => $name) {
+                $data['to'][] = array('email' => $email, 'name' => $name);
+            }
         }
     }
     /**
@@ -76,8 +75,9 @@ class MaildockerTransport extends Transport
     protected function setCc(&$data, Swift_Mime_Message $message)
     {
         if ($cc = $message->getCc()) {
-            $data['cc'] = array_keys($cc);
-            $data['ccname'] = array_values($cc);
+            foreach ($cc as $email => $name) {
+                $data['cc'][] = array('email' => $email, 'name' => $name);
+            }
         }
     }
     /**
@@ -87,8 +87,9 @@ class MaildockerTransport extends Transport
     protected function setBcc(&$data, Swift_Mime_Message $message)
     {
         if ($bcc = $message->getBcc()) {
-            $data['bcc'] = array_keys($bcc);
-            $data['bccname'] = array_values($bcc);
+            foreach ($bcc as $email => $name) {
+                $data['bcc'][] = array('email' => $email, 'name' => $name);
+            }
         }
     }
     /**
@@ -135,7 +136,7 @@ class MaildockerTransport extends Transport
             }
             $handler = tmpfile();
             fwrite($handler, $attachment->getBody());
-            $data['files[' . $attachment->getFilename() . ']'] = $handler;
+            $data['attachments[' . $attachment->getFilename() . ']'] = $handler;
         }
     }
 }
