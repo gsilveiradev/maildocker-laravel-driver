@@ -35,7 +35,7 @@ MAIL_DRIVER=maildocker
 
 If you need to pass any options to the guzzle client instance which is making the request to the Maildocker API, you can do so by setting the 'guzzle' options in `config/services.php`
 ```php
-'sendgrid' => [
+'maildocker' => [
     'api_key' => env('MAILDOCKER_API_KEY'),
     'api_secret' => env('MAILDOCKER_API_SECRET'),
     'guzzle' => [
